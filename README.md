@@ -6,6 +6,10 @@
 
 Real-time analytics dashboard for Cloudflare sites, designed for horizontal sidecar displays (1920x480). Shows traffic, status codes, cache metrics, and top countries with a theme system and smooth auto-refresh.
 
+I have x2 of these:  [8.8 inch HDMI Touch Long Wide Monitor](https://www.aliexpress.com/item/1005008000569770.html?spm=a2g0o.order_list.order_list_main.25.8cf6180201s2HV) which are used to display various different things, this is deisgned to fit perfectly on these. It's a simple anaytics display with a few simple themes. Not much going on in the backend and supports cloudflare free graphql API endpoints. 
+
+A scheme of which you can view [here](https://pages.johnspurlock.com/graphql-schema-docs/cloudflare.html)  
+
 ## Features
 
 - Traffic metrics: pageviews (with fallback), uniques, requests, bandwidth

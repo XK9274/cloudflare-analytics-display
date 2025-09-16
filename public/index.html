@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Analytics Dashboard</title>
+    <!-- Use UMD build to expose global Chart in non-module browsers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/index.min.js"></script>
+    <link rel="stylesheet" href="themes.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header Section -->
+        <header class="dashboard-header">
+            <div class="site-info">
+                <h1 class="site-title">slipp.space analytics</h1>
+                <div class="build-version" id="buildVersion"></div>
+                <div class="last-updated" id="lastUpdated">Loading...</div>
+            </div>
+            <div class="theme-selector" id="themeSelector" aria-label="Theme selector">
+                <!-- Light themes -->
+                <button class="theme-swatch" data-theme="light" title="Light"></button>
+                <button class="theme-swatch" data-theme="one-light" title="One Light"></button>
+                <button class="theme-swatch" data-theme="e-ink" title="E-ink"></button>
+                <!-- Color themes -->
+                <button class="theme-swatch" data-theme="sepia" title="Sepia"></button>
+                <button class="theme-swatch" data-theme="solarized-blue" title="Solarized Blue"></button>
+                <button class="theme-swatch" data-theme="solarized-green" title="Solarized Green"></button>
+                <button class="theme-swatch" data-theme="solarized-orange" title="Solarized Orange"></button>
+                <button class="theme-swatch" data-theme="oceanic" title="Oceanic"></button>
+                <!-- Dark themes -->
+                <button class="theme-swatch" data-theme="stellar" title="Stellar"></button>
+                <button class="theme-swatch" data-theme="monokai" title="Monokai"></button>
+                <button class="theme-swatch" data-theme="one-dark" title="One Dark"></button>
+                <button class="theme-swatch" data-theme="dark" title="Dark"></button>
+            </div>
+            <div class="current-time" id="currentTime"></div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            <!-- Metrics Cards Section -->
+            <section class="metrics-section">
+                <div class="metric-card" id="pageviewsCard">
+                    <div class="metric-icon">PV</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="pageviews">-</div>
+                        <div class="metric-label">Page Views</div>
+                        <div class="metric-change">24h</div>
+                    </div>
+                </div>
+                <div class="metric-card" id="pageviewsCachedCard">
+                    <div class="metric-icon">PVc</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="pageviewsCached">-</div>
+                        <div class="metric-label">Cached Page Views</div>
+                        <div class="metric-change">est</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" id="uniquesCard">
+                    <div class="metric-icon">UV</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="uniques">-</div>
+                        <div class="metric-label">Unique Visitors</div>
+                        <div class="metric-change">24h</div>
+                    </div>
+                </div>
+                <div class="metric-card" id="uniquesCachedCard">
+                    <div class="metric-icon">UVc</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="uniquesCached">-</div>
+                        <div class="metric-label">Cached Uniques</div>
+                        <div class="metric-change">est</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" id="requestsCard">
+                    <div class="metric-icon">REQ</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="requests">-</div>
+                        <div class="metric-label">Total Requests</div>
+                        <div class="metric-change">24h</div>
+                    </div>
+                </div>
+                <div class="metric-card" id="requestsCachedCard">
+                    <div class="metric-icon">REQc</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="requestsCached">-</div>
+                        <div class="metric-label">Cached Requests</div>
+                        <div class="metric-change" id="cacheHitRate">hit rate</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" id="bandwidthCard">
+                    <div class="metric-icon">BW</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="bandwidth">-</div>
+                        <div class="metric-label">Bandwidth</div>
+                        <div class="metric-change">24h</div>
+                    </div>
+                </div>
+                <div class="metric-card" id="bandwidthCachedCard">
+                    <div class="metric-icon">BWc</div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="bandwidthCached">-</div>
+                        <div class="metric-label">Cached Bandwidth</div>
+                        <div class="metric-change">estimated</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <!-- Traffic Chart (top) -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Traffic Over Time (24h)</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item">
+                                <span class="legend-color" style="background: #00d4ff;"></span>
+                                Page Views
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color" style="background: #ff6b6b;"></span>
+                                Requests
+                            </span>
+                        </div>
+                    </div>
+                    <canvas id="trafficChart"></canvas>
+                </div>
+
+                <!-- Bottom chart: Top Countries only -->
+                <div class="charts-bottom">
+                    <div class="chart-container geo-chart">
+                        <div class="chart-header">
+                            <h3>Top Countries</h3>
+                        </div>
+                        <div class="geo-list" id="geoList">
+                            <div class="loading">Loading geographic data...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Section -->
+            <section class="status-section">
+                <div class="system-info">
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value online" id="systemStatus">Online</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Refresh:</span>
+                        <span class="info-value" id="refreshInterval">30s</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Next Update:</span>
+                        <span class="info-value" id="nextUpdate">-</span>
+                    </div>
+                </div>
+
+                <div class="status-container">
+                    <div class="status-header">
+                        <h3>HTTP Status Codes</h3>
+                    </div>
+                    <div class="status-grid" id="statusGrid">
+                        <div class="status-item">
+                            <div class="status-code success">2xx</div>
+                            <div class="status-count" id="status2xx">-</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-code redirect">3xx</div>
+                            <div class="status-count" id="status3xx">-</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-code error">4xx</div>
+                            <div class="status-count" id="status4xx">-</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-code server-error">5xx</div>
+                            <div class="status-count" id="status5xx">-</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage" style="display: none;">
+            <div class="error-content">
+                <span class="error-icon">⚠️</span>
+                <span class="error-text">Failed to load analytics data</span>
+                <button class="retry-button" onclick="fetchAnalytics()">Retry</button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading analytics data...</div>
+        </div>
+    </div>
+
+    <!-- Modularized dashboard scripts (order matters) -->
+    <script src="js/utils.js" defer></script>
+    <script src="js/dashboard-class.js" defer></script>
+    <script src="js/init.js" defer></script>
+</body>
+</html>

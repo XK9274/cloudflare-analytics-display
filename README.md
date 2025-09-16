@@ -124,11 +124,6 @@ There are webhook-related files in the repo (`webhook-*.sh` and `webhook-*.js`).
 - `src/services/analyticsService.js` — GraphQL queries, aggregation, cache
 - `public/` — static assets (HTML, CSS, themes, JS modules)
 
-## Notes & Limits
-
-- Free-tier quirks: pageviews can be zero; UI falls back to 80% of requests for readability (marked as estimate).
-- Top Paths and fine-grained cache status breakdown are removed for free-tier compatibility.
-
 ## License
 
 MIT License — see `LICENSE`.

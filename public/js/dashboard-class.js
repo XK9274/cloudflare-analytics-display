@@ -4,6 +4,7 @@
 class AnalyticsDashboard {
   constructor() {
     this.trafficChart = null;
+    this.httpStatusChart = null;
     this.refreshInterval = 30; // seconds
     this.refreshTimer = null;
     this.countdownTimer = null;
@@ -116,12 +117,15 @@ class AnalyticsDashboard {
 
   initializeCharts() {
     const ctx = document.getElementById('trafficChart').getContext('2d');
-    const styles = getComputedStyle(document.documentElement);
-    const pageviewsColor = styles.getPropertyValue('--chart-pageviews').trim();
-    const requestsColor = styles.getPropertyValue('--chart-requests').trim();
-    const tooltipBg = getComputedStyle(document.body).getPropertyValue('--bg-overlay').trim() || 'rgba(0,0,0,0.8)';
-    const tooltipText = styles.getPropertyValue('--text-primary').trim() || '#fff';
-    const tooltipBorder = styles.getPropertyValue('--border-primary').trim() || 'rgba(0, 212, 255, 0.5)';
+    const pageviewsColor = this.getCssVariable('--chart-pageviews', '#00d4ff');
+    const cachedPageviewsColor = this.getCssVariable('--chart-cached-pageviews', '#4ecdc4');
+    const requestsColor = this.getCssVariable('--chart-requests', '#ff6b6b');
+    const cachedRequestsColor = this.getCssVariable('--chart-cached-requests', '#45b7d1');
+    const gridColor = this.getCssVariable('--border-tertiary', 'rgba(127,127,127,0.2)');
+    const tickColor = this.getCssVariable('--text-tertiary', '#888');
+    const tooltipBg = this.getCssVariable('--bg-overlay', 'rgba(0,0,0,0.8)');
+    const tooltipText = this.getCssVariable('--text-primary', '#fff');
+    const tooltipBorder = this.getCssVariable('--border-primary', 'rgba(0, 212, 255, 0.5)');
 
     this.trafficChart = new Chart(ctx, {
       type: 'line',
@@ -132,8 +136,20 @@ class AnalyticsDashboard {
             label: 'Page Views',
             data: [],
             borderColor: pageviewsColor,
-            backgroundColor: pageviewsColor + '20',
+            backgroundColor: this.colorWithAlpha(pageviewsColor, 0.12),
             borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+          },
+          {
+            label: 'Cached Page Views',
+            data: [],
+            borderColor: cachedPageviewsColor,
+            backgroundColor: this.colorWithAlpha(cachedPageviewsColor, 0.12),
+            borderWidth: 2,
+            borderDash: [5, 4],
             fill: true,
             tension: 0.4,
             pointRadius: 0,
@@ -143,8 +159,20 @@ class AnalyticsDashboard {
             label: 'Requests',
             data: [],
             borderColor: requestsColor,
-            backgroundColor: requestsColor + '20',
+            backgroundColor: this.colorWithAlpha(requestsColor, 0.12),
             borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+          },
+          {
+            label: 'Cached Requests',
+            data: [],
+            borderColor: cachedRequestsColor,
+            backgroundColor: this.colorWithAlpha(cachedRequestsColor, 0.12),
+            borderWidth: 2,
+            borderDash: [5, 4],
             fill: true,
             tension: 0.4,
             pointRadius: 0,
@@ -163,18 +191,106 @@ class AnalyticsDashboard {
         scales: {
           x: {
             display: true,
-            grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--border-tertiary').trim() || 'rgba(127,127,127,0.2)', drawBorder: false },
-            ticks: { color: styles.getPropertyValue('--text-tertiary').trim() || '#888', font: { size: 10 }, maxTicksLimit: 12 },
+            grid: { color: gridColor, drawBorder: false },
+            ticks: { color: tickColor, font: { size: 10 }, maxTicksLimit: 12 },
           },
           y: {
             display: true,
-            grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--border-tertiary').trim() || 'rgba(127,127,127,0.2)', drawBorder: false },
-            ticks: { color: styles.getPropertyValue('--text-tertiary').trim() || '#888', font: { size: 10 }, callback: (v) => formatNumber(v) },
+            grid: { color: gridColor, drawBorder: false },
+            ticks: { color: tickColor, font: { size: 10 }, callback: (v) => formatNumber(v) },
           },
         },
         elements: { line: { borderJoinStyle: 'round' } },
       },
     });
+
+    const statusCanvas = document.getElementById('httpStatusChart');
+    if (statusCanvas) {
+      const statusCtx = statusCanvas.getContext('2d');
+      const status2xxColor = this.getCssVariable('--status-success', '#4ecdc4');
+      const status3xxColor = this.getCssVariable('--status-redirect', '#45b7d1');
+      const status4xxColor = this.getCssVariable('--status-error', '#ff6b6b');
+      const status5xxColor = this.getCssVariable('--status-server-error', '#ff4757');
+
+      this.httpStatusChart = new Chart(statusCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: '2xx',
+              data: [],
+              borderColor: status2xxColor,
+              backgroundColor: this.colorWithAlpha(status2xxColor, 0.2),
+              borderWidth: 1.5,
+              fill: true,
+              tension: 0.35,
+              pointRadius: 0,
+              stack: 'status',
+            },
+            {
+              label: '3xx',
+              data: [],
+              borderColor: status3xxColor,
+              backgroundColor: this.colorWithAlpha(status3xxColor, 0.2),
+              borderWidth: 1.5,
+              fill: true,
+              tension: 0.35,
+              pointRadius: 0,
+              stack: 'status',
+            },
+            {
+              label: '4xx',
+              data: [],
+              borderColor: status4xxColor,
+              backgroundColor: this.colorWithAlpha(status4xxColor, 0.2),
+              borderWidth: 1.5,
+              fill: true,
+              tension: 0.35,
+              pointRadius: 0,
+              stack: 'status',
+            },
+            {
+              label: '5xx',
+              data: [],
+              borderColor: status5xxColor,
+              backgroundColor: this.colorWithAlpha(status5xxColor, 0.2),
+              borderWidth: 1.5,
+              fill: true,
+              tension: 0.35,
+              pointRadius: 0,
+              stack: 'status',
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: { backgroundColor: tooltipBg, titleColor: tooltipText, bodyColor: tooltipText, borderColor: tooltipBorder, borderWidth: 1 },
+          },
+          scales: {
+            x: {
+              display: true,
+              grid: { color: gridColor, drawBorder: false },
+              ticks: { color: tickColor, font: { size: 10 }, maxTicksLimit: 12 },
+            },
+            y: {
+              display: true,
+              stacked: true,
+              grid: { color: gridColor, drawBorder: false },
+              ticks: { color: tickColor, font: { size: 10 }, callback: (v) => formatNumber(v) },
+            },
+          },
+          elements: { line: { borderJoinStyle: 'round' } },
+        },
+      });
+    }
+
+    this.applyTrafficChartTheme();
+    this.applyHttpStatusChartTheme();
   }
 
   async fetchAnalytics() {
@@ -206,6 +322,7 @@ class AnalyticsDashboard {
     this.updateTrafficChart(data.timeseries);
     this.updateGeographicData(data.geographic);
     this.updateHttpStatus(data.httpStatus);
+    this.updateHttpStatusTrend(data.httpStatusSeries);
     this.updateLastUpdated(data.lastUpdated);
     this.updateSystemInfo(data);
   }
@@ -259,6 +376,8 @@ class AnalyticsDashboard {
       this.trafficChart.data.labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
       this.trafficChart.data.datasets[0].data = new Array(24).fill(0);
       this.trafficChart.data.datasets[1].data = new Array(24).fill(0);
+      this.trafficChart.data.datasets[2].data = new Array(24).fill(0);
+      this.trafficChart.data.datasets[3].data = new Array(24).fill(0);
       this.trafficChart.update('none');
       return;
     }
@@ -269,10 +388,18 @@ class AnalyticsDashboard {
     });
     const pageviewsData = timeseries.map(p => p.pageviews || 0);
     const requestsData = timeseries.map(p => p.requests || 0);
+    const cachedPageviewsData = timeseries.map(p => {
+      if (typeof p.cachedPageviews === 'number') return p.cachedPageviews;
+      const ratio = p.cacheRatio || 0;
+      return Math.round((p.pageviews || 0) * ratio);
+    });
+    const cachedRequestsData = timeseries.map(p => p.cachedRequests || 0);
 
     this.trafficChart.data.labels = labels;
     this.trafficChart.data.datasets[0].data = pageviewsData;
-    this.trafficChart.data.datasets[1].data = requestsData;
+    this.trafficChart.data.datasets[1].data = cachedPageviewsData;
+    this.trafficChart.data.datasets[2].data = requestsData;
+    this.trafficChart.data.datasets[3].data = cachedRequestsData;
     this.trafficChart.update('none');
   }
 
@@ -323,6 +450,33 @@ class AnalyticsDashboard {
     document.getElementById('status3xx').textContent = formatNumber(status3xx);
     document.getElementById('status4xx').textContent = formatNumber(status4xx);
     document.getElementById('status5xx').textContent = formatNumber(status5xx);
+  }
+
+  updateHttpStatusTrend(statusSeries) {
+    if (!this.httpStatusChart) return;
+
+    if (!statusSeries || statusSeries.length === 0) {
+      const fallbackLabels = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
+      const zeroData = new Array(fallbackLabels.length).fill(0);
+      this.httpStatusChart.data.labels = fallbackLabels;
+      this.httpStatusChart.data.datasets.forEach((dataset) => {
+        dataset.data = zeroData.slice();
+      });
+      this.httpStatusChart.update('none');
+      return;
+    }
+
+    const labels = statusSeries.map((point) => {
+      const d = new Date(point.datetime);
+      return `${d.getHours().toString().padStart(2, '0')}:00`;
+    });
+
+    this.httpStatusChart.data.labels = labels;
+    this.httpStatusChart.data.datasets[0].data = statusSeries.map((point) => point['2xx'] || 0);
+    this.httpStatusChart.data.datasets[1].data = statusSeries.map((point) => point['3xx'] || 0);
+    this.httpStatusChart.data.datasets[2].data = statusSeries.map((point) => point['4xx'] || 0);
+    this.httpStatusChart.data.datasets[3].data = statusSeries.map((point) => point['5xx'] || 0);
+    this.httpStatusChart.update('none');
   }
 
   updateLastUpdated(lastUpdated) {
@@ -378,6 +532,123 @@ class AnalyticsDashboard {
     overlay.style.display = (show && this.isFirstLoad) ? 'flex' : 'none';
   }
 
+  applyTrafficChartTheme() {
+    if (!this.trafficChart) return;
+
+    const datasetColorMap = {
+      'Page Views': this.getCssVariable('--chart-pageviews', '#00d4ff'),
+      'Cached Page Views': this.getCssVariable('--chart-cached-pageviews', '#4ecdc4'),
+      Requests: this.getCssVariable('--chart-requests', '#ff6b6b'),
+      'Cached Requests': this.getCssVariable('--chart-cached-requests', '#45b7d1'),
+    };
+
+    this.trafficChart.data.datasets.forEach((dataset) => {
+      const baseColor = datasetColorMap[dataset.label];
+      if (!baseColor) return;
+      dataset.borderColor = baseColor;
+      dataset.backgroundColor = this.colorWithAlpha(baseColor, 0.12);
+    });
+
+    const gridColor = this.getCssVariable('--border-tertiary', 'rgba(127,127,127,0.2)');
+    const tickColor = this.getCssVariable('--text-tertiary', '#888');
+    const tooltipBg = this.getCssVariable('--bg-overlay', 'rgba(0,0,0,0.8)');
+    const tooltipText = this.getCssVariable('--text-primary', '#fff');
+    const tooltipBorder = this.getCssVariable('--border-primary', 'rgba(0, 212, 255, 0.5)');
+
+    this.trafficChart.options.scales.x.grid.color = gridColor;
+    this.trafficChart.options.scales.y.grid.color = gridColor;
+    this.trafficChart.options.scales.x.ticks.color = tickColor;
+    this.trafficChart.options.scales.y.ticks.color = tickColor;
+    this.trafficChart.options.plugins.tooltip.backgroundColor = tooltipBg;
+    this.trafficChart.options.plugins.tooltip.titleColor = tooltipText;
+    this.trafficChart.options.plugins.tooltip.bodyColor = tooltipText;
+    this.trafficChart.options.plugins.tooltip.borderColor = tooltipBorder;
+    this.trafficChart.update('none');
+  }
+
+  applyHttpStatusChartTheme() {
+    if (!this.httpStatusChart) return;
+
+    const datasetColorMap = {
+      '2xx': this.getCssVariable('--status-success', '#4ecdc4'),
+      '3xx': this.getCssVariable('--status-redirect', '#45b7d1'),
+      '4xx': this.getCssVariable('--status-error', '#ff6b6b'),
+      '5xx': this.getCssVariable('--status-server-error', '#ff4757'),
+    };
+
+    this.httpStatusChart.data.datasets.forEach((dataset) => {
+      const baseColor = datasetColorMap[dataset.label];
+      if (!baseColor) return;
+      dataset.borderColor = baseColor;
+      dataset.backgroundColor = this.colorWithAlpha(baseColor, 0.2);
+    });
+
+    const gridColor = this.getCssVariable('--border-tertiary', 'rgba(127,127,127,0.2)');
+    const tickColor = this.getCssVariable('--text-tertiary', '#888');
+    const tooltipBg = this.getCssVariable('--bg-overlay', 'rgba(0,0,0,0.8)');
+    const tooltipText = this.getCssVariable('--text-primary', '#fff');
+    const tooltipBorder = this.getCssVariable('--border-primary', 'rgba(0, 212, 255, 0.5)');
+
+    this.httpStatusChart.options.scales.x.grid.color = gridColor;
+    this.httpStatusChart.options.scales.y.grid.color = gridColor;
+    this.httpStatusChart.options.scales.x.ticks.color = tickColor;
+    this.httpStatusChart.options.scales.y.ticks.color = tickColor;
+    this.httpStatusChart.options.plugins.tooltip.backgroundColor = tooltipBg;
+    this.httpStatusChart.options.plugins.tooltip.titleColor = tooltipText;
+    this.httpStatusChart.options.plugins.tooltip.bodyColor = tooltipText;
+    this.httpStatusChart.options.plugins.tooltip.borderColor = tooltipBorder;
+    this.httpStatusChart.update('none');
+  }
+
+  getCssVariable(name, defaultValue) {
+    const bodyStyles = document.body ? getComputedStyle(document.body) : null;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const bodyValue = bodyStyles ? bodyStyles.getPropertyValue(name) : '';
+    const rootValue = rootStyles ? rootStyles.getPropertyValue(name) : '';
+    const value = (bodyValue && bodyValue.trim()) || (rootValue && rootValue.trim()) || '';
+    return value.length ? value : defaultValue;
+  }
+
+  colorWithAlpha(color, alpha = 0.2) {
+    if (!color) return `rgba(0,0,0,${alpha})`;
+    const trimmed = color.trim();
+
+    const clampAlpha = (value) => Math.min(1, Math.max(0, value));
+    const parseHex = (hex) => parseInt(hex, 16);
+
+    if (/^#([0-9a-f]{3})$/i.test(trimmed)) {
+      const [, hex] = trimmed.match(/^#([0-9a-f]{3})$/i);
+      const r = parseHex(hex[0] + hex[0]);
+      const g = parseHex(hex[1] + hex[1]);
+      const b = parseHex(hex[2] + hex[2]);
+      return `rgba(${r}, ${g}, ${b}, ${clampAlpha(alpha)})`;
+    }
+
+    if (/^#([0-9a-f]{6})([0-9a-f]{2})?$/i.test(trimmed)) {
+      const [, hex, alphaHex] = trimmed.match(/^#([0-9a-f]{6})([0-9a-f]{2})?$/i);
+      const r = parseHex(hex.slice(0, 2));
+      const g = parseHex(hex.slice(2, 4));
+      const b = parseHex(hex.slice(4, 6));
+      const existingAlpha = alphaHex ? parseHex(alphaHex) / 255 : 1;
+      return `rgba(${r}, ${g}, ${b}, ${clampAlpha(existingAlpha * alpha)})`;
+    }
+
+    if (/^rgba?\(/i.test(trimmed)) {
+      const values = trimmed
+        .replace(/rgba?\(/i, '')
+        .replace(/\)/, '')
+        .split(',')
+        .map((part) => part.trim());
+      const r = parseFloat(values[0]) || 0;
+      const g = parseFloat(values[1]) || 0;
+      const b = parseFloat(values[2]) || 0;
+      const existingAlpha = values[3] !== undefined ? parseFloat(values[3]) : 1;
+      return `rgba(${r}, ${g}, ${b}, ${clampAlpha(existingAlpha * alpha)})`;
+    }
+
+    return trimmed;
+  }
+
   initTheme() {
     const saved = localStorage.getItem('dashboard-theme');
     if (saved) document.body.dataset.theme = saved;
@@ -394,29 +665,8 @@ class AnalyticsDashboard {
       btn.addEventListener('click', () => {
         document.body.dataset.theme = theme;
         localStorage.setItem('dashboard-theme', theme);
-        if (this.trafficChart) {
-          const styles = getComputedStyle(document.documentElement);
-          const pageviewsColor = styles.getPropertyValue('--chart-pageviews').trim();
-          const requestsColor = styles.getPropertyValue('--chart-requests').trim();
-          this.trafficChart.data.datasets[0].borderColor = pageviewsColor;
-          this.trafficChart.data.datasets[0].backgroundColor = pageviewsColor + '20';
-          this.trafficChart.data.datasets[1].borderColor = requestsColor;
-          this.trafficChart.data.datasets[1].backgroundColor = requestsColor + '20';
-          const gridColor = styles.getPropertyValue('--border-tertiary').trim() || 'rgba(127,127,127,0.2)';
-          const tickColor = styles.getPropertyValue('--text-tertiary').trim() || '#888';
-          this.trafficChart.options.scales.x.grid.color = gridColor;
-          this.trafficChart.options.scales.y.grid.color = gridColor;
-          this.trafficChart.options.scales.x.ticks.color = tickColor;
-          this.trafficChart.options.scales.y.ticks.color = tickColor;
-          const tooltipBg = getComputedStyle(document.body).getPropertyValue('--bg-overlay').trim() || 'rgba(0,0,0,0.8)';
-          const tooltipText = styles.getPropertyValue('--text-primary').trim() || '#fff';
-          const tooltipBorder = styles.getPropertyValue('--border-primary').trim() || 'rgba(0, 212, 255, 0.5)';
-          this.trafficChart.options.plugins.tooltip.backgroundColor = tooltipBg;
-          this.trafficChart.options.plugins.tooltip.titleColor = tooltipText;
-          this.trafficChart.options.plugins.tooltip.bodyColor = tooltipText;
-          this.trafficChart.options.plugins.tooltip.borderColor = tooltipBorder;
-          this.trafficChart.update('none');
-        }
+        this.applyTrafficChartTheme();
+        this.applyHttpStatusChartTheme();
       });
     });
   }
@@ -458,4 +708,3 @@ class AnalyticsDashboard {
     return nameMap[countryCode] || countryCode;
   }
 }
-

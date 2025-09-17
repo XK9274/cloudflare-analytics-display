@@ -98,17 +98,30 @@ async function fetchAnalyticsData() {
       { requests: 0, pageviews: 0, bytes: 0, threats: 0, uniques: 0, cachedRequests: 0, cachedBytes: 0 },
     );
 
-    let timeseries = timeseriesData.map((item) => ({
-      datetime: item.dimensions.datetime,
-      requests: item.sum.requests || 0,
-      pageviews: item.sum.pageViews || 0,
-      bytes: item.sum.bytes || 0,
-      threats: item.sum.threats || 0,
-      uniques: item.uniq.uniques || 0,
-      cachedRequests: item.sum.cachedRequests || 0,
-      cachedBytes: item.sum.cachedBytes || 0,
-      responseStatusMap: item.sum.responseStatusMap || [],
-    }));
+    let timeseries = timeseriesData.map((item) => {
+      const requests = item.sum.requests || 0;
+      const statusBuckets = { '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0 };
+      (item.sum.responseStatusMap || []).forEach((record) => {
+        const code = record.edgeResponseStatus || record.httpStatusCode;
+        const value = record.requests || 0;
+        if (code >= 200 && code < 300) statusBuckets['2xx'] += value;
+        else if (code >= 300 && code < 400) statusBuckets['3xx'] += value;
+        else if (code >= 400 && code < 500) statusBuckets['4xx'] += value;
+        else if (code >= 500 && code < 600) statusBuckets['5xx'] += value;
+      });
+
+      return {
+        datetime: item.dimensions.datetime,
+        requests,
+        pageviews: item.sum.pageViews || 0,
+        bytes: item.sum.bytes || 0,
+        threats: item.sum.threats || 0,
+        uniques: item.uniq.uniques || 0,
+        cachedRequests: item.sum.cachedRequests || 0,
+        cachedBytes: item.sum.cachedBytes || 0,
+        statusBuckets,
+      };
+    });
 
     const allPageviewsZero = timeseries.length > 0 && timeseries.every((pt) => (pt.pageviews || 0) === 0);
     if (allPageviewsZero) {
@@ -116,16 +129,24 @@ async function fetchAnalyticsData() {
       totals.pageviews = timeseries.reduce((sum, pt) => sum + (pt.pageviews || 0), 0);
     }
 
+    timeseries = timeseries.map((pt) => {
+      const cacheRatioPoint = pt.requests > 0 ? (pt.cachedRequests || 0) / pt.requests : 0;
+      const cachedPageviews = Math.round((pt.pageviews || 0) * cacheRatioPoint);
+      const uncachedRequests = Math.max((pt.requests || 0) - (pt.cachedRequests || 0), 0);
+      return {
+        ...pt,
+        cacheRatio: cacheRatioPoint,
+        cachedPageviews,
+        uncachedRequests,
+      };
+    });
+
     const httpStatusAgg = { '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0 };
     timeseries.forEach((pt) => {
-      (pt.responseStatusMap || []).forEach((m) => {
-        const code = m.edgeResponseStatus || m.httpStatusCode;
-        const r = m.requests || 0;
-        if (code >= 200 && code < 300) httpStatusAgg['2xx'] += r;
-        else if (code >= 300 && code < 400) httpStatusAgg['3xx'] += r;
-        else if (code >= 400 && code < 500) httpStatusAgg['4xx'] += r;
-        else if (code >= 500 && code < 600) httpStatusAgg['5xx'] += r;
-      });
+      httpStatusAgg['2xx'] += pt.statusBuckets['2xx'] || 0;
+      httpStatusAgg['3xx'] += pt.statusBuckets['3xx'] || 0;
+      httpStatusAgg['4xx'] += pt.statusBuckets['4xx'] || 0;
+      httpStatusAgg['5xx'] += pt.statusBuckets['5xx'] || 0;
     });
 
     const countryTotals = {};
@@ -156,6 +177,10 @@ async function fetchAnalyticsData() {
       totals,
       geographic,
       httpStatus,
+      httpStatusSeries: timeseries.map((pt) => ({
+        datetime: pt.datetime,
+        ...pt.statusBuckets,
+      })),
       cache: {
         cachedRequests: totals.cachedRequests,
         cachedBytes: totals.cachedBytes,
@@ -200,4 +225,3 @@ module.exports = {
   fetchAnalyticsData,
   analyticsCache,
 };
-

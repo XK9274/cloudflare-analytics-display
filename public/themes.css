@@ -31,6 +31,8 @@
     /* Chart Colors */
     --chart-pageviews: #00d4ff;
     --chart-requests: #ff6b6b;
+    --chart-cached-pageviews: #4ecdc4;
+    --chart-cached-requests: #45b7d1;
     --chart-gradient: linear-gradient(90deg, #00d4ff, #ff6b6b, #4ecdc4, #45b7d1);
 }
 
@@ -65,6 +67,8 @@ body[data-theme="light"] {
     
     --chart-pageviews: #0ea5e9;
     --chart-requests: #f97316;
+    --chart-cached-pageviews: #14b8a6;
+    --chart-cached-requests: #6366f1;
 }
 
 /* Sepia Theme */
@@ -93,6 +97,8 @@ body[data-theme="sepia"] {
     
     --chart-pageviews: #8b4513;
     --chart-requests: #cd853f;
+    --chart-cached-pageviews: #6b8e23;
+    --chart-cached-requests: #b8860b;
 }
 
 /* Solarized Orange Theme */
@@ -121,6 +127,8 @@ body[data-theme="solarized-orange"] {
     
     --chart-pageviews: #cb4b16;
     --chart-requests: #dc322f;
+    --chart-cached-pageviews: #859900;
+    --chart-cached-requests: #268bd2;
 }
 
 /* Solarized Green Theme */
@@ -149,6 +157,8 @@ body[data-theme="solarized-green"] {
     
     --chart-pageviews: #859900;
     --chart-requests: #dc322f;
+    --chart-cached-pageviews: #2aa198;
+    --chart-cached-requests: #268bd2;
 }
 
 /* Solarized Blue Theme */
@@ -177,6 +187,8 @@ body[data-theme="solarized-blue"] {
     
     --chart-pageviews: #268bd2;
     --chart-requests: #dc322f;
+    --chart-cached-pageviews: #2aa198;
+    --chart-cached-requests: #b58900;
 }
 
 /* Stellar Theme */
@@ -205,6 +217,8 @@ body[data-theme="stellar"] {
     
     --chart-pageviews: #58a6ff;
     --chart-requests: #f85149;
+    --chart-cached-pageviews: #3fb950;
+    --chart-cached-requests: #79c0ff;
 }
 
 /* E-ink Theme */
@@ -233,6 +247,8 @@ body[data-theme="e-ink"] {
     
     --chart-pageviews: #111111;
     --chart-requests: #5c5c5c;
+    --chart-cached-pageviews: #333333;
+    --chart-cached-requests: #777777;
 }
 
 /* Monokai Dark */
@@ -261,6 +277,8 @@ body[data-theme="monokai"] {
 
     --chart-pageviews: #66d9ef;
     --chart-requests: #f92672;
+    --chart-cached-pageviews: #a6e22e;
+    --chart-cached-requests: #ae81ff;
 }
 
 /* Atom One Dark */
@@ -289,6 +307,8 @@ body[data-theme="one-dark"] {
 
     --chart-pageviews: #61afef;
     --chart-requests: #e06c75;
+    --chart-cached-pageviews: #98c379;
+    --chart-cached-requests: #c678dd;
 }
 
 /* Atom One Light */
@@ -317,6 +337,8 @@ body[data-theme="one-light"] {
 
     --chart-pageviews: #7c3aed;
     --chart-requests: #ef4444;
+    --chart-cached-pageviews: #0ea5e9;
+    --chart-cached-requests: #22c55e;
 }
 
 /* Oceanic (colorful) */
@@ -345,4 +367,6 @@ body[data-theme="oceanic"] {
 
     --chart-pageviews: #00bcd4;
     --chart-requests: #ff6b6b;
+    --chart-cached-pageviews: #26a69a;
+    --chart-cached-requests: #4fc3f7;
 }

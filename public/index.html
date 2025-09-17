@@ -120,12 +120,20 @@
                         <h3>Traffic Over Time (24h)</h3>
                         <div class="chart-legend">
                             <span class="legend-item">
-                                <span class="legend-color" style="background: #00d4ff;"></span>
+                                <span class="legend-color legend-pageviews"></span>
                                 Page Views
                             </span>
                             <span class="legend-item">
-                                <span class="legend-color" style="background: #ff6b6b;"></span>
+                                <span class="legend-color legend-cached-pageviews"></span>
+                                Cached Page Views
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color legend-requests"></span>
                                 Requests
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color legend-cached-requests"></span>
+                                Cached Requests
                             </span>
                         </div>
                     </div>
@@ -165,6 +173,27 @@
                 <div class="status-container">
                     <div class="status-header">
                         <h3>HTTP Status Codes</h3>
+                        <div class="chart-legend status-legend">
+                            <span class="legend-item">
+                                <span class="legend-color legend-status-2xx"></span>
+                                2xx
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color legend-status-3xx"></span>
+                                3xx
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color legend-status-4xx"></span>
+                                4xx
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-color legend-status-5xx"></span>
+                                5xx
+                            </span>
+                        </div>
+                    </div>
+                    <div class="status-chart-container">
+                        <canvas id="httpStatusChart"></canvas>
                     </div>
                     <div class="status-grid" id="statusGrid">
                         <div class="status-item">

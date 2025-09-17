@@ -235,6 +235,7 @@ body {
 .chart-legend {
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .legend-item {
@@ -250,6 +251,21 @@ body {
     height: 12px;
     border-radius: 2px;
 }
+
+.legend-pageviews { background: var(--chart-pageviews); }
+.legend-cached-pageviews {
+    background: transparent;
+    border: 1px dashed var(--chart-cached-pageviews);
+}
+.legend-requests { background: var(--chart-requests); }
+.legend-cached-requests {
+    background: transparent;
+    border: 1px dashed var(--chart-cached-requests);
+}
+.legend-status-2xx { background: var(--status-success); }
+.legend-status-3xx { background: var(--status-redirect); }
+.legend-status-4xx { background: var(--status-error); }
+.legend-status-5xx { background: var(--status-server-error); }
 
 #trafficChart {
     height: calc(100% - 36px) !important;
@@ -328,11 +344,35 @@ body {
     flex: 1;
 }
 
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
 .status-header h3 {
     font-size: 14px;
     color: var(--text-primary);
     font-weight: 600;
+}
+
+.status-legend {
+    gap: 10px;
+}
+
+.status-legend .legend-item {
+    font-size: 10px;
+}
+
+.status-chart-container {
+    height: 140px;
     margin-bottom: 12px;
+}
+
+#httpStatusChart {
+    height: 100% !important;
 }
 
 .status-grid {
